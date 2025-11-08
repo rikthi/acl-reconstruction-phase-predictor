@@ -17,9 +17,9 @@ PREPROCESSED_DIR = 'data_preprocessed'
 IMG_SIZE = (224, 224)
 BATCH_SIZE = 32
 EPOCHS = 20
-VALIDATION_SPLIT = 0.2
+VALIDATION_SPLIT = 0.2  # 20% of videos for validation
 RANDOM_SEED = 42
-WORKERS = 8  # Number of CPU cores to use for loading data
+# WORKERS = 8 # We will remove this from model.fit()
 
 # Your 5 specific phases.
 KNOWN_PHASES = sorted([
@@ -172,12 +172,12 @@ def main():
         train_gen,
         validation_data=val_gen,
         epochs=EPOCHS,
-        callbacks=callbacks,
-        # --- THIS IS THE SPEEDUP ---
-        # Use multiple CPU cores to load data in parallel
-        workers=WORKERS,
-        use_multiprocessing=True
-        # ----------------------------
+        callbacks=callbacks
+        # --- FIX ---
+        # Removed 'workers' and 'use_multiprocessing'
+        # as they are not supported in this Keras version.
+        # The data generator is already very fast without them.
+        # -----------
     )
     print("--- Training Complete ---")
     print("Best model saved as 'surgical_phase_model.keras'")

@@ -8,10 +8,10 @@ import os
 class SurgicalDataGenerator(tf.keras.utils.Sequence):
     """
     Custom Keras data generator to load pre-extracted image frames.
-    This is MUCH faster than reading from video files.
+    This version adds stronger data augmentation.
     """
 
-    def __init__(self, frame_list, batch_size, img_size, n_classes, shuffle=True):
+    def __init__(self, frame_list, batch_size, img_size, n_classes, shuffle=True, augment=False):
         """
         Initialization
         :param frame_list: List of (image_path, label_index) tuples.
@@ -19,6 +19,7 @@ class SurgicalDataGenerator(tf.keras.utils.Sequence):
         :param img_size: Tuple (height, width) to resize frames.
         :param n_classes: Total number of unique phase labels.
         :param shuffle: Whether to shuffle data at the end of each epoch.
+        :param augment: Whether to apply data augmentation (flips, rotation, etc.)
         """
         super().__init__()
 
@@ -27,6 +28,7 @@ class SurgicalDataGenerator(tf.keras.utils.Sequence):
         self.img_size = img_size
         self.n_classes = n_classes
         self.shuffle = shuffle
+        self.augment = augment
         self.on_epoch_end()
 
     def __len__(self):
@@ -49,6 +51,45 @@ class SurgicalDataGenerator(tf.keras.utils.Sequence):
         if self.shuffle:
             np.random.shuffle(self.indices)
 
+    def _augment_image(self, image):
+        """Applies random transformations to a single image."""
+
+        # 1. Random Horizontal Flip
+        if np.random.rand() > 0.5:
+            image = cv2.flip(image, 1)
+
+        # 2. Random Rotation (between -10 and +10 degrees)
+        angle = np.random.uniform(-10, 10)
+        rows, cols = image.shape[:2]
+        M = cv2.getRotationMatrix2D((cols / 2, rows / 2), angle, 1)
+        image = cv2.warpAffine(image, M, (cols, rows), borderValue=(0, 0, 0))  # Fill borders with black
+
+        # 3. Random Zoom (between 100% and 120%)
+        scale = np.random.uniform(1.0, 1.2)
+        h, w = image.shape[:2]
+        ch, cw = int(h / scale), int(w / scale)  # Cropped height/width
+
+        h_start = (h - ch) // 2
+        w_start = (w - cw) // 2
+
+        cropped = image[h_start:h_start + ch, w_start:w_start + cw]
+        image = cv2.resize(cropped, (w, h), interpolation=cv2.INTER_LINEAR)
+
+        # --- NEW AUGMENTATIONS ---
+        # 4. Random Brightness/Contrast (Step 4)
+        if np.random.rand() < 0.3:
+            alpha = np.random.uniform(0.8, 1.2)  # contrast
+            beta = np.random.uniform(-20, 20)  # brightness
+            image = cv2.convertScaleAbs(image, alpha=alpha, beta=beta)
+
+        # 5. Random Gaussian Blur (Step 4)
+        if np.random.rand() < 0.2:
+            ksize = int(np.random.choice([3, 5]))  # Kernel size must be odd
+            image = cv2.GaussianBlur(image, (ksize, ksize), 0)
+        # -------------------------
+
+        return image
+
     def __data_generation(self, batch_samples):
         """Generates data containing batch_size samples."""
         X = np.empty((self.batch_size, *self.img_size, 3), dtype=np.float32)
@@ -62,13 +103,16 @@ class SurgicalDataGenerator(tf.keras.utils.Sequence):
                 print(f"Error reading image {image_path}, using black frame.")
                 frame = np.zeros((*self.img_size, 3), dtype=np.uint8)
 
-            # Convert color and preprocess
+            # Convert color
             frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-            # No resize needed, as preprocess.py already did it
-            # frame_resized = cv2.resize(frame_rgb, (self.img_size[1], self.img_size[0]))
+            # Apply augmentation if enabled
+            if self.augment:
+                frame_rgb = self._augment_image(frame_rgb)
 
-            X[i,] = tf.keras.applications.mobilenet_v2.preprocess_input(frame_rgb)
+            # Preprocess for the model
+            # NOTE: We now call a generic 'preprocess_input'
+            X[i,] = tf.keras.applications.efficientnet.preprocess_input(frame_rgb)
             y[i] = label
 
         return X, y

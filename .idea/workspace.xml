@@ -4,16 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="dcac1fb9-3a59-4e91-b570-f6d5991c0d1f" name="Changes" comment="fixes">
-      <change afterPath="$PROJECT_DIR$/infer_lstm.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/model_lstm.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/prev models/surgical_phase_model.keras" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sequence_generator.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/train_lstm.py" afterDir="false" />
+    <list default="true" id="dcac1fb9-3a59-4e91-b570-f6d5991c0d1f" name="Changes" comment="lstm code added">
+      <change afterPath="$PROJECT_DIR$/infer_lstm_fast.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DataGenerator.py" beforeDir="false" afterPath="$PROJECT_DIR$/DataGenerator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/predict.py" beforeDir="false" afterPath="$PROJECT_DIR$/predict.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/train.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/infer_lstm.py" beforeDir="false" afterPath="$PROJECT_DIR$/infer_lstm.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/train_lstm.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_lstm.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,27 +51,30 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;Python.DataGenerator.executor&quot;: &quot;Run&quot;,
-    &quot;Python.preprocess.executor&quot;: &quot;Run&quot;,
-    &quot;Python.train.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;lstm-integration&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/theol/PycharmProjects/ACLPhasePredictor/data&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python.DataGenerator.executor": "Run",
+    "Python.infer_lstm.executor": "Run",
+    "Python.infer_lstm_fast.executor": "Run",
+    "Python.preprocess.executor": "Run",
+    "Python.train.executor": "Run",
+    "Python.train_lstm.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "lstm-integration",
+    "last_opened_file_path": "C:/Users/theol/PycharmProjects/ACLPhasePredictor/data",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\theol\PycharmProjects\ACLPhasePredictor\data" />
@@ -99,7 +97,8 @@
       <option name="presentableId" value="Default" />
       <updated>1762597491060</updated>
       <workItem from="1762597492106" duration="17432000" />
-      <workItem from="1762644171825" duration="2318000" />
+      <workItem from="1762644171825" duration="2441000" />
+      <workItem from="1762655392143" duration="7388000" />
     </task>
     <task id="LOCAL-00001" summary="pre processing videos to have 1 image frame per second">
       <option name="closed" value="true" />
@@ -117,7 +116,15 @@
       <option name="project" value="LOCAL" />
       <updated>1762605426325</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="lstm code added">
+      <option name="closed" value="true" />
+      <created>1762647237894</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1762647237894</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -126,10 +133,14 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="pre processing videos to have 1 image frame per second" />
     <MESSAGE value="fixes" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixes" />
+    <MESSAGE value="lstm code added" />
+    <option name="LAST_COMMIT_MESSAGE" value="lstm code added" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/ACLPhasePredictor$train_lstm.coverage" NAME="train_lstm Coverage Results" MODIFIED="1762656453499" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/ACLPhasePredictor$infer_lstm_fast.coverage" NAME="infer_lstm_fast Coverage Results" MODIFIED="1762681381400" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ACLPhasePredictor$preprocess.coverage" NAME="preprocess Coverage Results" MODIFIED="1762644453259" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/ACLPhasePredictor$infer_lstm.coverage" NAME="infer_lstm Coverage Results" MODIFIED="1762680876663" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ACLPhasePredictor$DataGenerator.coverage" NAME="DataGenerator Coverage Results" MODIFIED="1762600118094" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ACLPhasePredictor$train.coverage" NAME="train Coverage Results" MODIFIED="1762637550586" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>

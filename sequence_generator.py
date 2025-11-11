@@ -1,4 +1,4 @@
-# sequence_generator.py
+
 import numpy as np
 import cv2
 import math
@@ -7,20 +7,10 @@ from tensorflow.keras.applications import efficientnet
 import os
 
 class SequenceDataGenerator(tf.keras.utils.Sequence):
-    """
-    Yields sequences (windows) of frames: shape (batch, seq_len, H, W, 3)
-    Labels are the CENTER frame's label (int).
-    frame_list: list of tuples (video_folder, image_path, label_int)
-    We expect that frame filenames contain the frame index so we can sort.
-    """
+
     def __init__(self, master_list, batch_size, img_size=(224,224), seq_len=16,
                  shuffle=True, augment=False, preprocess_fn=None):
-        """
-        master_list: list of tuples (video_folder, image_path, label_int)
-                     where video_folder is used to group by video.
-        seq_len: number of frames in each window (should be even or odd; center used)
-        preprocess_fn: function(image_np) -> preprocessed np.float32 (calls EfficientNet preprocess)
-        """
+
         self.master_list = master_list
         self.batch_size = batch_size
         self.img_size = img_size
@@ -35,10 +25,10 @@ class SequenceDataGenerator(tf.keras.utils.Sequence):
         # try to find a numeric frame index in the filename
         base = os.path.basename(path)
         import re
-        m = re.search(r'(\d{4,})', base)  # sequences of at least 4 digits
+        m = re.search(r'(\d{4,})', base)
         if m:
             return int(m.group(1))
-        # fallback to filename
+
         return base
 
     def _build_index(self):
@@ -51,16 +41,15 @@ class SequenceDataGenerator(tf.keras.utils.Sequence):
         for video, items in groups.items():
             items_sorted = sorted(items, key=lambda x: self._frame_sort_key(x[0]))
             self.groups.append((video, items_sorted))
-        # Build list of (group_idx, center_idx) valid centers where we can extract seq_len window
+
         self.indexes = []
         half = self.seq_len // 2
         for gi, (_, items) in enumerate(self.groups):
             L = len(items)
             for center in range(L):
-                # allow clamping at edges (repeat edge frames) — still valid
+
                 self.indexes.append((gi, center))
-        # we will sample from self.indexes
-        # For speed, precompute per-group frame arrays (paths & labels)
+
         self.group_paths = []
         self.group_labels = []
         for _, items in self.groups:
@@ -78,8 +67,7 @@ class SequenceDataGenerator(tf.keras.utils.Sequence):
             np.random.shuffle(self.order)
 
     def _augment_image(self, image):
-        # small augmentations for temporal data (keep consistent per frame)
-        # You can expand this as needed.
+
         if np.random.rand() < 0.5:
             image = cv2.flip(image, 1)
         if np.random.rand() < 0.3:
@@ -97,7 +85,7 @@ class SequenceDataGenerator(tf.keras.utils.Sequence):
         return image
 
     def __getitem__(self, idx):
-        # assemble batch of sequences
+
         batch_order = self.order[idx*self.batch_size:(idx+1)*self.batch_size]
         seqs = np.zeros((self.batch_size, self.seq_len, self.img_size[0], self.img_size[1], 3), dtype='float32')
         targets = np.zeros((self.batch_size,), dtype='int32')
@@ -108,14 +96,14 @@ class SequenceDataGenerator(tf.keras.utils.Sequence):
             paths = self.group_paths[gi]
             labels = self.group_labels[gi]
             L = len(paths)
-            # get window indices, clamp to edges
+
             idxs = [min(max(0, center - half + k), L-1) for k in range(self.seq_len)]
             frames = []
             for j, fi in enumerate(idxs):
                 p = paths[fi]
                 img = cv2.imread(p)
                 if img is None:
-                    # fallback black frame
+
                     img = np.zeros((self.img_size[0], self.img_size[1], 3), dtype='uint8')
                 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
                 img = cv2.resize(img, (self.img_size[1], self.img_size[0]), interpolation=cv2.INTER_LINEAR)

@@ -5,7 +5,7 @@ import numpy as np
 import tensorflow as tf
 from tqdm import tqdm
 
-# --- CONFIG ---
+
 MODEL_PATH = "model_phase2_lstm.keras"
 LABEL_MAP_PATH = "label_map.json"
 PREDICTIONS_DIR = "predictions"
@@ -13,7 +13,7 @@ SEQ_LEN = 8
 IMG_SIZE = (224, 224)
 BATCH_SIZE = 16
 SMOOTH_WINDOW = 3
-SAMPLE_FPS = 1   # 👈 Only keep 1 frame per second
+SAMPLE_FPS = 1   # Only keep 1 frame per second
 
 
 def preprocess_frame(frame):
@@ -58,10 +58,10 @@ def predict_video(model, video_path, int_to_label):
     print(f"Total sampled frames: {len(frames)}")
 
     if len(frames) < SEQ_LEN:
-        print("⚠️ Not enough frames for a full sequence.")
+        print("Not enough frames for a full sequence.")
         return
 
-    # Build overlapping sequences
+
     sequences = []
     for i in range(0, len(frames) - SEQ_LEN + 1):
         seq = np.stack(frames[i:i + SEQ_LEN])
@@ -71,11 +71,11 @@ def predict_video(model, video_path, int_to_label):
     print(f"Running model on {len(X)} sequences...")
     preds = model.predict(X, batch_size=BATCH_SIZE, verbose=1)
 
-    # Temporal smoothing
+
     smoothed_preds = temporal_smooth(preds, window=SMOOTH_WINDOW)
     predicted_classes = np.argmax(smoothed_preds, axis=1)
 
-    # Expand predictions to match sampled frames (not full FPS)
+
     final_predictions = [predicted_classes[0]] * (SEQ_LEN - 1) + predicted_classes.tolist()
 
     output_path = os.path.splitext(video_path)[0] + "-PREDICTED-phases.txt"
@@ -83,12 +83,12 @@ def predict_video(model, video_path, int_to_label):
         for i, label_idx in enumerate(final_predictions):
             f.write(f"{i}\t{int_to_label[str(label_idx)]}\n")
 
-    print(f"✅ Saved 1 FPS predictions → {output_path}")
+    print(f"Saved 1 FPS predictions → {output_path}")
 
 
 def main():
     if not os.path.exists(MODEL_PATH):
-        print("❌ Model not found.")
+        print("Model not found.")
         return
 
     print("Loading model...")

@@ -5,7 +5,7 @@ import numpy as np
 import tensorflow as tf
 from tqdm import tqdm
 
-# --- CONFIG ---
+
 MODEL_PATH = "model_phase2_lstm.keras"
 LABEL_MAP_PATH = "label_map.json"
 PREDICTIONS_DIR = "predictions"
@@ -13,7 +13,7 @@ SEQ_LEN = 8
 IMG_SIZE = (224, 224)
 BATCH_SIZE = 8       # smaller batch to save RAM
 SMOOTH_WINDOW = 3
-CHUNK_SIZE = 3000    # process 3000 frames at a time
+CHUNK_SIZE = 3000    # process 3000 frames at a time  (Might cause ram allocation issues!!)
 
 
 def preprocess_frame(frame):
@@ -53,13 +53,13 @@ def predict_video(model, video_path, int_to_label):
         frame_index += 1
         pbar.update(1)
 
-        # When buffer gets big enough, predict and clear
+
         if len(frames_buffer) >= CHUNK_SIZE:
             preds = predict_chunk(model, frames_buffer)
             predictions.extend(preds)
-            frames_buffer = frames_buffer[-SEQ_LEN:]  # keep overlap
+            frames_buffer = frames_buffer[-SEQ_LEN:]
 
-    # Final leftover frames
+
     if len(frames_buffer) >= SEQ_LEN:
         preds = predict_chunk(model, frames_buffer)
         predictions.extend(preds)
@@ -67,22 +67,22 @@ def predict_video(model, video_path, int_to_label):
     pbar.close()
     cap.release()
 
-    # Temporal smoothing
+
     predictions = np.array(predictions)
     smoothed = temporal_smooth(predictions, window=SMOOTH_WINDOW)
     predicted_classes = np.argmax(smoothed, axis=1)
 
-    # Write output
+
     output_path = os.path.splitext(video_path)[0] + "-PREDICTED-phases.txt"
     with open(output_path, "w") as f:
         for i, class_idx in enumerate(predicted_classes):
             f.write(f"{i}\t{int_to_label[str(class_idx)]}\n")
 
-    print(f"✅ Saved predictions → {output_path}")
+    print(f"Saved predictions → {output_path}")
 
 
 def predict_chunk(model, frames):
-    """Predict in chunks of sequential data to save memory."""
+
     seqs = []
     for i in range(0, len(frames) - SEQ_LEN + 1):
         seq = np.stack(frames[i:i + SEQ_LEN])
@@ -94,7 +94,7 @@ def predict_chunk(model, frames):
 
 def main():
     if not os.path.exists(MODEL_PATH):
-        print("❌ Model not found.")
+        print(" Model not found.")
         return
 
     print("Loading model...")

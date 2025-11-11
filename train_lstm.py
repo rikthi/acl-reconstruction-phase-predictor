@@ -1,8 +1,3 @@
-"""
-EfficientNetB0 + LSTM Surgical Phase Recognition
-------------------------------------------------
-Predicts the surgical phase of short frame sequences (many-to-one).
-"""
 
 import os
 import glob
@@ -21,11 +16,11 @@ from sklearn.model_selection import GroupShuffleSplit
 from sklearn.utils.class_weight import compute_class_weight
 from tqdm import tqdm
 
-# ---------------- CONFIG ----------------
+
 PREPROCESSED_DIR = "data_preprocessed"
 IMG_SIZE = (224, 224)
-SEQ_LEN = 8                # frames per sequence
-BATCH_SIZE = 8             # number of sequences per batch
+SEQ_LEN = 8
+BATCH_SIZE = 8
 PHASE_1_EPOCHS = 8
 PHASE_2_EPOCHS = 15
 VALIDATION_SPLIT = 0.2
@@ -39,9 +34,7 @@ KNOWN_PHASES = sorted([
     "TibialTunnelCreation"
 ])
 
-# ----------------------------------------------------
-# Utility: Build sequence list  [(seq_frames, label), ...]
-# ----------------------------------------------------
+
 def build_sequence_list(root):
     label_to_int = {p: i for i, p in enumerate(KNOWN_PHASES)}
     int_to_label = {i: p for i, p in enumerate(KNOWN_PHASES)}
@@ -54,7 +47,6 @@ def build_sequence_list(root):
             continue
         for i in range(0, len(imgs) - SEQ_LEN, SEQ_LEN):
             seq_paths = imgs[i:i + SEQ_LEN]
-            # label from last frame name: 000120_Preparation.jpg
             phase_name = os.path.basename(seq_paths[-1]).split("_")[1].split(".")[0]
             if phase_name not in label_to_int:
                 continue
@@ -63,9 +55,7 @@ def build_sequence_list(root):
     return all_seqs, label_to_int, int_to_label
 
 
-# ----------------------------------------------------
-# Sequence Data Generator
-# ----------------------------------------------------
+
 class SequenceGenerator(tf.keras.utils.Sequence):
     def __init__(self, seq_list, batch_size, img_size, n_classes,
                  shuffle=True, augment=False):
@@ -107,9 +97,7 @@ class SequenceGenerator(tf.keras.utils.Sequence):
         return X, y
 
 
-# ----------------------------------------------------
-# Build Model
-# ----------------------------------------------------
+
 def build_model(input_shape, n_classes):
     cnn = EfficientNetB0(include_top=False, weights="imagenet", input_shape=input_shape)
     cnn.trainable = False
@@ -117,16 +105,14 @@ def build_model(input_shape, n_classes):
     seq_input = Input(shape=(SEQ_LEN, *input_shape))
     x = TimeDistributed(cnn)(seq_input)
     x = TimeDistributed(GlobalAveragePooling2D())(x)
-    x = LSTM(256, return_sequences=False)(x)   # many-to-one
+    x = LSTM(256, return_sequences=False)(x)
     x = Dropout(0.5)(x)
     out = Dense(n_classes, activation="softmax")(x)
     model = Model(seq_input, out)
     return model, cnn
 
 
-# ----------------------------------------------------
-# Main training loop
-# ----------------------------------------------------
+
 def main():
     np.random.seed(RANDOM_SEED)
     tf.random.set_seed(RANDOM_SEED)
@@ -140,7 +126,7 @@ def main():
     print(f"Found sequences: {len(seq_list)}")
     print(f"Classes: {label_to_int}")
 
-    # Split by video (group) to avoid leakage
+
     groups = [v for v, _, _ in seq_list]
     labels = [l for _, _, l in seq_list]
     splitter = GroupShuffleSplit(n_splits=1, test_size=VALIDATION_SPLIT,
@@ -151,26 +137,26 @@ def main():
     val_seqs = [seq_list[i] for i in val_idx]
     print(f"Train seq: {len(train_seqs)}  Val seq: {len(val_seqs)}")
 
-    # Class weights
+
     cw = compute_class_weight("balanced",
                               classes=np.arange(len(KNOWN_PHASES)),
                               y=np.array(labels))
     class_weights = dict(enumerate(cw))
     print(f"Class weights: {class_weights}")
 
-    # Generators
+
     train_gen = SequenceGenerator(train_seqs, BATCH_SIZE, IMG_SIZE, len(KNOWN_PHASES),
                                   shuffle=True)
     val_gen = SequenceGenerator(val_seqs, BATCH_SIZE, IMG_SIZE, len(KNOWN_PHASES),
                                 shuffle=False)
 
-    # Build and compile
+
     model, cnn = build_model((*IMG_SIZE, 3), len(KNOWN_PHASES))
     model.compile(optimizer=tf.keras.optimizers.Adam(1e-4),
                   loss="sparse_categorical_crossentropy",
                   metrics=["accuracy"])
 
-    # Callbacks
+
     callbacks_phase1 = [
         ModelCheckpoint("model_phase1_lstm.keras", save_best_only=True, monitor="val_accuracy"),
         EarlyStopping(monitor="val_accuracy", patience=3, restore_best_weights=True),
@@ -183,7 +169,7 @@ def main():
               class_weight=class_weights,
               callbacks=callbacks_phase1)
 
-    # Phase 2: fine-tune last CNN layers
+
     cnn.trainable = True
     for layer in cnn.layers[:-20]:
         layer.trainable = False
@@ -202,7 +188,7 @@ def main():
               class_weight=class_weights,
               callbacks=callbacks_phase2)
 
-    # Save label map
+
     with open("label_map.json", "w") as f:
         json.dump({"label_to_int": label_to_int, "int_to_label": int_to_label}, f)
     print("\nTraining complete.  Best model saved as model_phase2_lstm.keras")

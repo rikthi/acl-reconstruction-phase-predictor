@@ -2,19 +2,19 @@ import os
 import glob
 import cv2
 import numpy as np
-from tqdm import tqdm  # A progress bar library: pip install tqdm
+from tqdm import tqdm
 
-# --- Configuration ---
+
 DATA_DIR = 'data'
 OUTPUT_DIR = 'data_preprocessed'
 IMG_SIZE = (224, 224)
-FRAME_SUBSAMPLE_RATE = 30  # Grab 1 frame every 30 frames (e.g., 1fps)
+FRAME_SUBSAMPLE_RATE = 30  # Grab 1 frame every 30 frames
 
 
-# ---------------------
+
 
 def get_video_paths(data_dir):
-    """Finds all video files and matches them to label files."""
+
     video_paths = []
     label_files = sorted(glob.glob(os.path.join(data_dir, "*-phase.txt")))
 
@@ -45,11 +45,9 @@ def get_video_paths(data_dir):
 
 
 def extract_frames(video_path, label_file, video_id):
-    """
-    Extracts, subsamples, and saves frames for a single video.
-    """
 
-    # 1. Load labels into a dictionary for fast lookup
+
+
     labels = {}
     with open(label_file, 'r') as f:
         for line in f:
@@ -57,13 +55,13 @@ def extract_frames(video_path, label_file, video_id):
                 frame_idx_str, phase_name = line.strip().split('\t')
                 labels[int(frame_idx_str)] = phase_name
             except ValueError:
-                pass  # Skip malformed lines
+                pass
 
     if not labels:
         print(f"No labels found in {label_file}. Skipping video.")
         return
 
-    # 2. Open video and create output directory
+
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
         print(f"Error opening video: {video_path}")
@@ -75,24 +73,24 @@ def extract_frames(video_path, label_file, video_id):
     frame_count = 0
     saved_count = 0
 
-    # 3. Loop through every frame in the video
+
     pbar = tqdm(total=int(cap.get(cv2.CAP_PROP_FRAME_COUNT)), desc=f"Processing {video_id}")
 
     while cap.isOpened():
         ret, frame = cap.read()
 
         if not ret:
-            break  # End of video
+            break
 
-        # 4. Check if this frame is one we want to save
+
         if frame_count % FRAME_SUBSAMPLE_RATE == 0:
-            # 5. Check if this frame has a valid label
+
             phase_name = labels.get(frame_count)
             if phase_name is not None:
-                # 6. Resize and save the frame
+
                 frame_resized = cv2.resize(frame, (IMG_SIZE[1], IMG_SIZE[0]))
 
-                # Create a filename: e.g., 000120_Preparation.jpg
+
                 save_name = f"{frame_count:08d}_{phase_name}.jpg"
                 save_path = os.path.join(video_output_dir, save_name)
 
@@ -123,7 +121,7 @@ def main():
     print(f"Found {len(video_list)} videos to pre-process.")
 
     for video_path, label_file in video_list:
-        video_id = os.path.splitext(os.path.basename(video_path))[0]  # e.g., "video1"
+        video_id = os.path.splitext(os.path.basename(video_path))[0]
         extract_frames(video_path, label_file, video_id)
 
     print("\n--- Pre-processing Complete! ---")

@@ -6,21 +6,9 @@ import os
 
 
 class SurgicalDataGenerator(tf.keras.utils.Sequence):
-    """
-    Custom Keras data generator to load pre-extracted image frames.
-    This version adds stronger data augmentation.
-    """
+
 
     def __init__(self, frame_list, batch_size, img_size, n_classes, shuffle=True, augment=False):
-        """
-        Initialization
-        :param frame_list: List of (image_path, label_index) tuples.
-        :param batch_size: Size of each batch.
-        :param img_size: Tuple (height, width) to resize frames.
-        :param n_classes: Total number of unique phase labels.
-        :param shuffle: Whether to shuffle data at the end of each epoch.
-        :param augment: Whether to apply data augmentation (flips, rotation, etc.)
-        """
         super().__init__()
 
         self.frame_list = frame_list
@@ -32,11 +20,11 @@ class SurgicalDataGenerator(tf.keras.utils.Sequence):
         self.on_epoch_end()
 
     def __len__(self):
-        """Returns the number of batches per epoch."""
+
         return math.floor(len(self.frame_list) / self.batch_size)
 
     def __getitem__(self, index):
-        """Generate one batch of data."""
+
         batch_indices = self.indices[index * self.batch_size:(index + 1) * self.batch_size]
         batch_samples = [self.frame_list[k] for k in batch_indices]
 
@@ -46,13 +34,13 @@ class SurgicalDataGenerator(tf.keras.utils.Sequence):
         return X, y
 
     def on_epoch_end(self):
-        """Updates indices after each epoch."""
+
         self.indices = np.arange(len(self.frame_list))
         if self.shuffle:
             np.random.shuffle(self.indices)
 
     def _augment_image(self, image):
-        """Applies random transformations to a single image."""
+
 
         # 1. Random Horizontal Flip
         if np.random.rand() > 0.5:
@@ -91,7 +79,7 @@ class SurgicalDataGenerator(tf.keras.utils.Sequence):
         return image
 
     def __data_generation(self, batch_samples):
-        """Generates data containing batch_size samples."""
+
         X = np.empty((self.batch_size, *self.img_size, 3), dtype=np.float32)
         y = np.empty((self.batch_size,), dtype=int)
 
